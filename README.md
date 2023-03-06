@@ -16,19 +16,19 @@ Projeyi fokrlayın, klonlayın ve bolca commitleyin.
 
 Erişim fonksiyonlarını `api/users/users-model.js` dosyasına yazacaksınız:
 
-- [ ] `bul`
-- [ ] `goreBul`
-- [ ] `idyeGoreBul`
-- [ ] `ekle`
+- [x] `bul`
+- [x] `goreBul`
+- [x] `idyeGoreBul`
+- [x] `ekle`
 
 #### 2B - Middleware Fonksiyonları
 
 Auth middlewarelarını `api/auth/auth-middleware.js` dosyasına yazacaksınız:
 
-- [ ] `sinirli`
-- [ ] `usernameBostami`
-- [ ] `sifreGecerlimi`
-- [ ] `usernameVarmi`
+- [x] `sinirli`
+- [x] `usernameBostami`
+- [x] `sifreGecerlimi`
+- [x] `usernameVarmi`
 
 #### 2C - Uçnoktalar
 

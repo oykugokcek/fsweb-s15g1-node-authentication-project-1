@@ -1,6 +1,9 @@
 // `checkUsernameFree`, `checkUsernameExists` ve `checkPasswordLength` gereklidir (require)
 // `auth-middleware.js` deki middleware fonksiyonları. Bunlara burda ihtiyacınız var!
-
+const router = require("express").Router();
+const Users = require("../users/users-model");
+const bcrypt = require("bcryptjs");
+const mw = require("./auth-middleware");
 
 /**
   1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
@@ -24,7 +27,23 @@
     "message": "Şifre 3 karakterden fazla olmalı"
   }
  */
+router.post(
+  "register",
+  mw.sifreGecerlimi,
+  mw.usernameBostami,
+  async (req, res, next) => {
+    try {
+      const newUser = req.body;
+      const hash = bcrypt.hashSync(newUser.password, 8);
+      newUser.password = hash;
 
+      const insertedUser = await Users.ekle(newUser);
+      res.status(200).json(insertedUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 /**
   2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
@@ -42,6 +61,25 @@
   }
  */
 
+router.post("/login", mw.usernameVarmi, (req, res, next) => {
+  try {
+    const presentUser = req.user;
+    const userPassword = presentUser.password;
+
+    const isTruePassword = bcrypt.compareSync(req.body.password, userPassword);
+    if (isTruePassword) {
+      req.session.user = presentUser;
+      res.json({ message: `Hoşgeldin ${presentUser.username}` });
+    } else {
+      next({
+        status: 401,
+        message: "Geçersiz kriter",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
   3 [GET] /api/auth/logout
@@ -59,5 +97,29 @@
   }
  */
 
- 
+router.get("/logout", mw.sinirli, (req, res, next) => {
+  try {
+    if (req.session.user) {
+      req.session.destroy((err) => {
+        if (err) {
+          next({
+            message: "Hata",
+          });
+        } else {
+          next({
+            status: 200,
+            message: "çıkış yapildi",
+          });
+        }
+      });
+    } else {
+      next({
+        status: 200,
+        message: "oturum bulunamadı",
+      });
+    }
+  } catch (error) {}
+});
+
 // Diğer modüllerde kullanılabilmesi için routerı "exports" nesnesine eklemeyi unutmayın.
+module.exports = router;

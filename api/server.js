@@ -1,7 +1,10 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+const session = require("express-session");
+const sessionStore = require("connect-session-knex")(session);
 
+const authRouter = require("./auth/auth-router");
 /**
   Kullanıcı oturumlarını desteklemek için `express-session` paketini kullanın!
   Kullanıcıların gizliliğini ihlal etmemek için, kullanıcılar giriş yapana kadar onlara cookie göndermeyin. 
@@ -21,11 +24,34 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
+server.use(
+  session({
+    name: "cikolatacips",
+    secure: "cikolatacipsfrom.env",
+    cookie: {
+      maxAge: 1000 * 60,
+      secure: false,
+      httpOnly: false,
+    },
+    // store:new Store({
+    //   knex: require("../data/db-config"),
+    //   tableName: "sessions",
+    //   sidFieldName: "sid",
+
+    // }),
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+server.use("/api/auth", authRouter);
+
 server.get("/", (req, res) => {
   res.json({ api: "up" });
 });
 
-server.use((err, req, res, next) => { // eslint-disable-line
+server.use((err, req, res, next) => {
+  // eslint-disable-line
   res.status(err.status || 500).json({
     message: err.message,
     stack: err.stack,
