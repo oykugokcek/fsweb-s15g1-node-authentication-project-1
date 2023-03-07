@@ -10,7 +10,7 @@ const Users = require("../users/users-model");
 */
 function sinirli(req, res, next) {
   try {
-    if (req.session && req.session.user_id) {
+    if (req.session.user) {
       next();
     } else {
       next({
@@ -52,11 +52,10 @@ async function usernameBostami(req, res, next) {
     "message": "Geçersiz kriter"
   }
 */
-async function usernameVarmi() {
+async function usernameVarmi(req, res, next) {
   try {
     const presentUser = await Users.goreBul({ username: req.body.username });
     if (presentUser.length > 0) {
-      req.user = presentUser[0];
       next();
     } else {
       next({ status: 401, message: "Geçersiz kriter" });

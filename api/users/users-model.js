@@ -3,28 +3,30 @@
  */
 
 const db = require("../../data/db-config");
-async function bul() {
-  // return db("users").select("user_id", "username");
+function bul() {
+  // // return db("users").select("user_id", "username");
 
-  let allUsers = await db("users");
-  let responseListUsers = allUsers.map((user) => {
-    return { user_id: user.user_id, username: user.username };
-  });
-  return responseListUsers;
+  // let allUsers = await db("users");
+  // let responseListUsers = allUsers.map((user) => {
+  //   return { user_id: user.user_id, username: user.username };
+  // });
+  // return responseListUsers;
+  return db("users");
 }
 
 /**
   verilen filtreye sahip tüm kullanıcıları içeren bir DİZİ ye çözümlenir
  */
-async function goreBul(filtre) {
-  let filtedeUserList = await db("users")
-    .where(filtre)
-    .map((user) => {
-      return { user_id: user.user_id, username: user.username };
-    });
-  return filtedeUserList;
+// async function goreBul(filtre) {
+//   let filteredUserList = await db("users").where(filtre);
+//   // let mappedUserList = filtedeUserList.map((user) => {
+//   //   return { user_id: user.user_id, username: user.username };
+//   // });
+//   return filteredUserList;
+// }
+function goreBul(filtre) {
+  return db("users").where(filtre);
 }
-
 /**
   verilen user_id li kullanıcıya çözümlenir, kullanıcı { user_id, username } içerir
  */

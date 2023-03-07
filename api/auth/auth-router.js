@@ -4,7 +4,7 @@ const router = require("express").Router();
 const Users = require("../users/users-model");
 const bcrypt = require("bcryptjs");
 const mw = require("./auth-middleware");
-
+const jwt = require("jsonwebtoken");
 /**
   1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
 
@@ -28,7 +28,7 @@ const mw = require("./auth-middleware");
   }
  */
 router.post(
-  "register",
+  "/register",
   mw.sifreGecerlimi,
   mw.usernameBostami,
   async (req, res, next) => {
@@ -38,7 +38,7 @@ router.post(
       newUser.password = hash;
 
       const insertedUser = await Users.ekle(newUser);
-      res.status(200).json(insertedUser);
+      res.status(201).json(insertedUser);
     } catch (error) {
       next(error);
     }
@@ -61,25 +61,31 @@ router.post(
   }
  */
 
-router.post("/login", mw.usernameVarmi, (req, res, next) => {
-  try {
-    const presentUser = req.user;
-    const userPassword = presentUser.password;
-
-    const isTruePassword = bcrypt.compareSync(req.body.password, userPassword);
-    if (isTruePassword) {
-      req.session.user = presentUser;
-      res.json({ message: `Hoşgeldin ${presentUser.username}` });
-    } else {
-      next({
-        status: 401,
-        message: "Geçersiz kriter",
-      });
+router.post(
+  "/login",
+  mw.usernameVarmi,
+  mw.sifreGecerlimi,
+  async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+      const presentUser = await Users.goreBul({
+        username,
+      }).first();
+      const isTruePassword = bcrypt.compareSync(password, presentUser.password);
+      if (presentUser && isTruePassword) {
+        req.session.user = presentUser;
+        res.json({ message: `Hoşgeldin ${presentUser.username}` });
+      } else {
+        next({
+          status: 401,
+          message: "Geçersiz kriter",
+        });
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
   3 [GET] /api/auth/logout
@@ -97,7 +103,7 @@ router.post("/login", mw.usernameVarmi, (req, res, next) => {
   }
  */
 
-router.get("/logout", mw.sinirli, (req, res, next) => {
+router.get("/logout", (req, res, next) => {
   try {
     if (req.session.user) {
       req.session.destroy((err) => {
@@ -115,7 +121,7 @@ router.get("/logout", mw.sinirli, (req, res, next) => {
     } else {
       next({
         status: 200,
-        message: "oturum bulunamadı",
+        message: "oturum bulunamadı!",
       });
     }
   } catch (error) {}

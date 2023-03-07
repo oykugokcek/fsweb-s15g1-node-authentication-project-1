@@ -27,3 +27,13 @@ const Users = require("../users/users-model");
  */
 
 // Diğer modüllerde kullanılabilmesi için routerı "exports" nesnesine eklemeyi unutmayın.
+router.get("/", mw.sinirli, async (req, res, next) => {
+  try {
+    const users = await Users.bul();
+    res.status(201).json(users);
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;
